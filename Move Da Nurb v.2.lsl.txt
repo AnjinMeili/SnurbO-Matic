@@ -1,0 +1,142 @@
+//
+// Nurbie Colorizer
+//
+// Finds the current offset from centers XYZ value, translated to an RGB color.
+//
+
+vector gOrigPos ;
+vector gPos ;
+vector gScale ;
+integer gId ;
+vector gColor ;
+integer gChanOffset = 20000 ;
+integer gChannel ;
+integer gHandle ;
+integer gGrid = 32 ;
+integer gMode ;
+integer gSurfChan ;
+vector gCenter ;
+integer gFlag ;
+float gTau = 1 ; 
+integer gCflag ;
+string gOstr ;
+integer CollideOnce ;
+integer gLflag ;
+integer row ;
+integer col ;
+
+myInit() {
+        llSetStatus(STATUS_PHYSICS, FALSE) ;
+        llSetStatus(STATUS_PHANTOM, TRUE) ;
+        gOrigPos = llGetPos() ;
+        gPos = llGetPos() ;
+        gScale = llGetScale() ;
+        gCflag = 0 ;
+        gLflag = 0 ;
+        llListenRemove(gHandle) ;
+        if( gId > 0 ) {
+            row = (integer)llFloor( gId / ( gGrid + 1 ) ) ;
+            col = (integer)( ( ( gGrid + 1 ) * row ) - gId );
+//            llOwnerSay("Nurbie " + (string)gId + " Row " + (string)row + " Col " + (string)col) ;
+            gHandle = llListen( -6666, "", NULL_KEY,"" ) ;
+        }
+    }
+
+FindRGB() { 
+    gPos = llGetPos() ;
+    vector offset = gPos - gCenter  ;
+    float r = offset.x ;
+    float g = offset.y ;
+    float b = offset.z ;
+    float c = llVecDist( gCenter, gOrigPos ) ;
+    r = ( ( r / c ) + 1 ) ;
+    g = ( ( g / c ) + 1 ) ; 
+    b = ( ( b / c ) + 1 ) ;
+    if( r != 0 ) r = r / 2 ;
+    if( g != 0 ) g = g / 2 ;
+    if( b != 0 ) b = b / 2 ;
+    llSetColor(<r,g,b>, ALL_SIDES) ;
+    integer R = (integer)( r * 255 ) ;
+    integer G = (integer)( g * 255 ) ;
+    integer B = (integer)( b * 255 ) ;
+    gOstr = (string)gId + "," + (string)R + "," + (string)G + "," + (string)B ;
+//    llSay(-4096,gOstr) ;  
+}
+        
+default {
+    state_entry() {
+        myInit() ;
+    }
+    
+    on_rez( integer param ) {
+        gId = param ;
+        myInit() ;
+    } 
+
+    collision_start( integer num_detect ) { 
+        integer idx ;
+        for( idx = 0 ; idx <= num_detect ; idx++ ) {
+            if(llDetectedName(idx) != "Nurbie") {
+                CollideOnce++ ;
+                if( CollideOnce == 4 ) {
+                    FindRGB() ;
+                    llSetStatus(STATUS_PHYSICS, FALSE) ;
+                    llSetStatus(STATUS_PHANTOM, TRUE) ;
+                    llStopMoveToTarget() ;
+                    llSetScale( gScale ) ; 
+                }
+            }
+        }
+    }
+    
+    at_target( integer tnum, vector targetpos, vector ourpos ) {
+        llOwnerSay((string)gId + "  Dang, made it to the middle...") ;
+        llSetStatus(STATUS_PHYSICS, FALSE) ;
+        llSetStatus(STATUS_PHANTOM, TRUE) ;
+        llStopMoveToTarget() ;
+        llSetPos(gPos) ;
+        llMoveToTarget(gCenter,gTau) ;
+    }
+        
+    listen( integer channel, string name, key id, string message) {
+        if( message == "return" ) {
+            llSetStatus(STATUS_PHYSICS, FALSE) ;
+            llSetStatus(STATUS_PHANTOM, TRUE) ;
+            llStopMoveToTarget() ;
+            llSetScale(gScale) ;
+            llSetPos(gPos) ;
+        }
+        else if( message == "hunt" ) {
+            llSetScale(<.01,.01,.01>);
+            llSetStatus(STATUS_PHANTOM, FALSE) ;
+            llSetStatus(STATUS_PHYSICS, TRUE) ;
+            llMoveToTarget(gCenter,gTau) ;  
+        }
+        else if( message == "big" ) {
+            llSetScale( gScale ) ;
+        }              
+        gCflag++ ;
+        if( gCflag == 1 ) {
+            gCenter = (vector)message ;
+            llSetScale(<.01,.01,.01>);
+            llSetStatus(STATUS_PHANTOM, FALSE) ;
+            llSetStatus(STATUS_PHYSICS, TRUE) ;
+            llMoveToTarget(gCenter,gTau) ;
+        }
+    } 
+    
+    touch_start( integer num_detected ) {
+        if(gId>0) {           
+            CollideOnce = 0 ;
+            llSetPos(gPos) ;
+            llSetScale(<.01,.01,.01>);
+            llSetStatus(STATUS_PHANTOM, FALSE) ;
+            llSetStatus(STATUS_PHYSICS, TRUE) ;
+            llMoveToTarget(gCenter,gTau) ;
+        }
+        else {
+            llOwnerSay("Running!") ;
+        }
+    }
+        
+} 

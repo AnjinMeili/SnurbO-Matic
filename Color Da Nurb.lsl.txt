@@ -1,0 +1,122 @@
+//
+// Nurbie Colorizer
+//
+// Finds the current offset from centers XYZ value, translated to an RGB color.
+//
+
+vector gPos ;
+vector gOrigPos ;
+vector gScale ;
+integer gId ;
+vector gColor ;
+integer gChanOffset = 10000 ;
+integer gChannel ;
+integer gHandle ;
+integer gGrid = 32 ;
+integer gMode ;
+integer gSurfChan ;
+vector gCenter ;
+integer gFlag ;
+float gTau = 1 ; 
+integer endhandle ;
+integer outchan ;
+
+myInit() {
+        llSetStatus(STATUS_PHYSICS, FALSE) ;
+        llSetStatus(STATUS_PHANTOM, TRUE) ;
+        gPos = llGetPos() ;
+        gOrigPos = gPos ;
+        gScale = llGetScale() ;
+        llListenRemove(gHandle) ;
+        llListenRemove(endhandle) ;
+        if( gId > 0 ) {
+            integer row ;
+            integer col ;
+            row = llFloor( ( gId - 1 ) / ( gGrid + 1 ) ) ;
+            col = ( gId - ( ( gGrid + 1 ) * row ) ) ;
+            llSetObjectName((string)gId) ;
+            llSetObjectDesc((string)row + "," + (string)col) ;
+            
+            gChannel = gChanOffset + gId ;
+            gHandle = llListen( -gChannel, "", NULL_KEY,"" ) ;
+//            llOwnerSay("Nurbie " + (string)gId + " in Row " + (string)row + " in Col " + (string)col) ;
+            
+            if( col == ( gGrid + 1 ) ) { 
+//                llOwnerSay((string)gId + "Dying:  End Col!") ;
+                llDie() ;
+            }
+                    
+            if( row == 0 && col > 1 ) {
+//                llOwnerSay((string)gId + "Dying: Row 0, Col " + (string)col ) ;
+                llDie() ;
+            }
+            else if( row == gGrid && col > 1 ) {
+//                llOwnerSay((string)gId + "Dying: Row 32, Col " + (string)col  ) ;
+                llDie() ;
+            }
+                                                                
+            else if( row == 0 && col == 1 ) {
+    //            llOwnerSay((string)gId + " Starting Nurbie at 0!" );
+                integer i ;
+                for( i = 1 ; i <= gGrid ; i++ ) {
+                    integer ichan = gChannel + i ;
+    //                llOwnerSay("listening on " + (string)ichan ) ; 
+                    llListen( -ichan, "", NULL_KEY, "" ) ;
+                }
+            }
+            else if( row == gGrid && col == 1 ) {
+                llOwnerSay((string)gId + " Ending Nurbie!") ;
+                integer i ;
+                for( i = 1 ; i <= gGrid ; i++ ) {
+                    integer ichan = gChannel + i ;
+ //                   llOwnerSay("listening on " + (string)ichan) ;
+                    llListen( -ichan, "", NULL_KEY, "" ) ;
+                }
+            } 
+            else if( col == 1 ) {
+                integer endrow = gChannel + gGrid ;
+   //             llOwnerSay("listening on " + (string)endrow ) ;
+                endhandle = llListen( -endrow, "", NULL_KEY, "") ;
+            }
+        }
+    }
+
+FindRGB() { 
+    gPos = llGetPos() ;
+    vector offset = gPos - gCenter  ;
+    float r = offset.x ;
+    float g = offset.y ;
+    float b = offset.z ;
+    float c = llVecDist( gCenter, gOrigPos ) ;
+    r = ( ( r / c ) + 1 ) ;
+    g = ( ( g / c ) + 1 ) ;
+    b = ( ( b / c ) + 1 ) ;
+    if( r != 0 ) r = r / 2 ;
+    if( g != 0 ) g = g / 2 ;
+    if( b != 0 ) b = b / 2 ;
+    llSetColor(<r,g,b>, ALL_SIDES) ;
+    integer R = (integer)( r * 255 ) ;
+    integer G = (integer)( g * 255 ) ;
+    integer B = (integer)( b * 255 ) ;
+    llSay(-4096,(string)outchan + "," + (string)R + "," + (string)G + "," + (string)B ) ;      
+}
+        
+default {
+    state_entry() {
+        myInit() ;
+    }
+    
+    on_rez( integer param ) {
+        gId = param ;
+        myInit() ;
+    } 
+        
+    listen( integer channel, string name, key id, string message) {
+            gCenter = (vector)message ;
+            outchan = gId ;
+            if( llAbs(channel) > 10000 ) {
+                outchan = llAbs(channel) - 10000 ;
+            }
+            FindRGB() ; 
+    }  
+} 

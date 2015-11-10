@@ -1,0 +1,41 @@
+integer gHandle ;
+integer gId ;
+vector gPos ;
+
+default
+{
+    state_entry() {
+        
+    }
+    
+    on_rez( integer param ) {
+        gPos = llGetPos() ;
+        if( param > 0 ) {
+            gId = param ;
+            llListenRemove(gHandle) ;
+            gHandle = llListen(-2048,"",NULL_KEY,"") ;
+        }
+        else llListenRemove(gHandle) ;
+    }
+    
+    listen( integer channel, string name, key id, string message ) {
+        if( message == "die" ) llDie() ;
+        else if( message == "white" ) llSetColor(<1.0,1.0,1.0>,ALL_SIDES) ;
+        else if( message == "reset" ) llSetPos( gPos ) ;
+        else {
+            vector rootpos = (vector)message ;
+            vector offset = gPos - rootpos  ;
+            float r = offset.x ;
+            float g = offset.y ;
+            float b = offset.z ;
+            float c = llVecDist( rootpos, gPos ) ;
+            r = ( ( r / c ) + 1 ) ;
+            g = ( ( g / c ) + 1 ) ;
+            b = ( ( b / c ) + 1 ) ;
+            if( r != 0 ) r = r / 2 ;
+            if( g != 0 ) g = g / 2 ;
+            if( b != 0 ) b = b / 2 ;
+            llSetColor(<r,g,b>, ALL_SIDES) ;
+        }
+    }        
+}

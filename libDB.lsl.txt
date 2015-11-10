@@ -1,0 +1,79 @@
+w
+string SILO = "http://www.thisoldtrawler.com/silo/1101/" ;
+integer gBuff = 250 ;
+integer gHandle ;
+string gPacket ;
+integer gSent ;
+integer gCnt ;
+integer gTcnt ;
+integer nid ;
+vector gPos ;
+integer gGrid = 32 ;
+integer gMcnt ;
+integer gControlHandle ;
+vector gScale ;
+float gRadius ;
+key gOwner ;
+string gCastName ;
+integer gDone ;
+key HTTP_key ;
+
+SendPacket() {
+    gSent++ ;
+    llOwnerSay("libDB:Packet " + (string)gSent + " Samples " + (string)gTcnt ) ;
+    string silo = SILO + (string)gOwner + "/nurbie_" + (string)gSent ;
+    llHTTPRequest( silo, [HTTP_METHOD,"PUT"], gPacket ) ;
+    gPacket = "" ;
+    gCnt = 0 ;
+    }
+                
+default
+{ 
+    state_entry() {
+        gHandle = llListen(-4096, "", NULL_KEY,"") ;
+        gControlHandle = llListen(4096, "", NULL_KEY, "") ;
+        gPos = llGetPos() ;
+        gTcnt = 1 ;
+        gMcnt = (integer)llPow( gGrid + 1, 2 ) + 1 ;
+        gScale = llGetScale() ;
+        gRadius = gScale.x / 2 ;
+        gOwner = llGetOwner() ;
+    }
+
+    on_rez( integer param ) {
+        llResetScript() ;
+    }
+        
+    listen( integer channel, string name, key id, string message ) {
+        if( channel == -4096 ) {
+            if( gCnt > gBuff ) SendPacket() ;
+            gPacket = gPacket + "\n" + message ;
+            gCnt++ ;
+            gTcnt++ ;
+            integer nchan = 10000 + gTcnt ;
+            llSay(-nchan,(string)gPos) ;
+            if( gTcnt == gMcnt ) {
+                SendPacket() ;
+                llOwnerSay("libDB: Finished Save for " + (string)gTcnt + " nurbs in " + (string)gSent ) ;
+                gDone = 1 ;
+                if( gCastName == "" ) {
+                    llOwnerSay("libDB: Please say a name for this casting on channel 4096.  letters & numbers ONLY!") ;
+                } 
+            }
+        }          
+        if( channel == 4096 ) {
+            gCastName = message ;
+            if( gDone == 1 ) {
+                llOwnerSay("Got filename " + gCastName + ", and mold is saved.  Making casting!") ;
+                HTTP_key = llHTTPRequest("http://tweety.hutch.org/cgi-bin/castmold.cgi?" + gCastName, [HTTP_METHOD,"GET"],"") ;
+            }
+        }
+    }       
+    
+    http_response( key request_id, integer status, list metadata, string body ) {
+        if( request_id == HTTP_key ) {
+            llOwnerSay("Mold Caster says : " + body ) ;
+            llResetScript() ;
+        }
+    }
+}

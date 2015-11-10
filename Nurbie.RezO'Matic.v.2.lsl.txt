@@ -1,0 +1,103 @@
+//
+// Makes a Nurb Map in a sphere around its center.
+
+vector gPos ; 
+float gRadius ;
+float gGrid = 32 ; 
+float gDeg ; 
+integer gHandle ;
+integer gNurbs ;
+vector gScale ;
+
+//
+// Make the Nurb Map.  
+MakeNurbMap() {
+    llOwnerSay("MakeNurbMap: Cranking up da Nurbies.") ;
+    float i ;
+    float j ;
+    float deg = ( 360 / gGrid ) ;  
+    vector scale = llGetScale() ;
+    gRadius = ( scale.x / 2 ) + .1 ;   
+    float dia = ( gRadius * 2 ) ;  
+    gNurbs = 0 ;
+    llSay(1024,"die") ;
+    llSay(-4096,"reset") ;
+    for( i = gGrid ; i >= 0 ; i-- ) {
+        float irads = ( ( deg / 2 ) * i ) * DEG_TO_RAD ;
+        float z = gRadius * llCos(irads) ;
+        float r = gRadius * llSin(irads) ;
+        for( j = 0 ; j <= gGrid ; j++ ) {
+            float jrads = ( deg * j ) * DEG_TO_RAD ;
+            float x = r * llSin(jrads) ; 
+            float y = r * llCos(jrads) ;
+            gNurbs = gNurbs + 1 ;
+            llRezObject("Nurbie", gPos + <x,y,z>, ZERO_VECTOR, ZERO_ROTATION, gNurbs );
+        }
+    }
+    llOwnerSay("MakeNurbMap: " + (string)gNurbs + " Nurbies online!");
+    llSetScale(<.01,.01,.01>) ;  
+}
+
+//
+// Make the Nurb Col 
+MakeNurbCol() {
+    llOwnerSay("MakeNurbMap: Cranking up da Nurbies in a Column Formation") ;
+    float i ;
+    float j ;
+    float deg = ( 360 / gGrid ) ;  
+    vector scale = llGetScale() ;
+    gRadius = ( scale.x / 2 ) + .1 ;   
+    float dia = ( gRadius * 2 ) ;  
+    gNurbs = 0 ;
+    llSay(1024,"die") ;
+    llSay(-4096,"reset") ;
+    for( i = gRadius ; i >= -gRadius ; i = ( i - ( dia / ( gGrid + 1 ) ) ) ) {
+        float z = i ;
+        for( j = 0 ; j <= gGrid ; j++ ) {
+            float jrads = ( deg * j ) * DEG_TO_RAD ;
+            float y = gRadius * llSin(jrads) ; 
+            float x = gRadius * llCos(jrads) ;
+            gNurbs = gNurbs + 1 ;
+            if( z == -gRadius || z == gRadius ) {
+                x = 0 ;
+                y = 0 ;
+            }
+            llRezObject("Nurbie", gPos + <x,y,z>, ZERO_VECTOR, ZERO_ROTATION, gNurbs );
+        }
+    }
+    llOwnerSay("MakeNurbMap: " + (string)gNurbs + " Nurbies online!");
+    llSetScale(<.01,.01,.01>) ;  
+}
+
+myInit() {
+    gPos = llGetPos() ;
+    gScale = llGetScale() ;
+    llListenRemove(gHandle) ;
+    gHandle = llListen(1024,"",NULL_KEY,"") ; 
+    llOwnerSay("Ready Freddy!") ; 
+    llSetText("", <0,0,0>, 0 ) ;
+}               
+    
+
+default
+{
+    state_entry()
+    {
+        myInit() ;
+    }
+    on_rez( integer param ) {
+        myInit() ;
+    }
+    listen( integer channel, string name, key id, string message ) {
+        if(message == "nurbs") MakeNurbMap() ;
+        else if(message == "die" ) {
+            llSay(-2048,"die") ;
+            llSetScale(gScale) ;
+            llResetScript() ;
+        }
+        else if(message == "column") MakeNurbCol() ;
+        else if(message == "color") llSay(-2048,(string)gPos) ;
+        else if(message == "white" ) llSay(-2048,"white") ;
+        else if(message == "save" ) llSay(-10001,(string)gPos) ;
+    }
+}   

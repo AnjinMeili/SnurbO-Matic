@@ -1,0 +1,78 @@
+vector gPos ;
+integer gCnt ;
+integer gGrid = 32 ;
+vector gScale ;
+float offset;
+integer gNurbMax ;
+integer gAxis ;
+integer gMode ;
+
+GoNurbieGo() {
+        if( gMode == 0 ) {
+            gCnt++ ;
+            vector offvec ;
+            if( gAxis == 3 ) {
+                float zoff = ( llFloor( gCnt / gGrid ) - ( gGrid / 2 ) ) * ( ( gScale.z / 2 ) / ( gGrid + 1 ) ) ;
+                offvec = <0,0,zoff> ;
+            }
+            else if( gAxis == 1 ) {
+                float xoff = ( llFloor( gCnt / gGrid ) - ( gGrid / 2 ) ) * ( ( gScale.x / 2 ) / ( gGrid + 1 ) ) ;
+                offvec = < xoff,0,0> ;
+            }
+            else if( gAxis == 2 ) {
+                float yoff = ( llFloor( gCnt / gGrid ) - ( gGrid / 2 ) ) * ( ( gScale.x / 2 ) / ( gGrid + 1 ) ) ;
+                offvec = < 0,yoff,0> ;
+            }  
+            vector sendpos = gPos + offvec ; 
+            llSay( -6666,(string)sendpos ) ;
+        }
+    }
+
+WalkNurbs() {
+    gCnt = 0 ;
+    gMode = 0 ;
+    integer i ;
+    for( i = 0 ; i <= (integer)llPow(gGrid + 1, 2); i++) {
+        GoNurbieGo() ;
+    }
+}
+
+default
+{
+    state_entry() {
+        gPos = llGetPos() ;
+        gScale = llGetScale() ;
+        gNurbMax = (integer)llPow( gGrid + 1 , 2 ) ; 
+        integer handle = llListen(1024,"", llGetOwner() ,"") ;
+    }
+    
+    on_rez( integer param ) {
+        llResetScript() ;
+    }
+    
+    object_rez(key id) {
+        GoNurbieGo() ;
+    }
+
+    
+//
+// The ugly command syntax to chat with the nurbies.
+//
+// target {axis} {%}    Spaces the axis targets for each row/col of vertexes based on a % of the diameter
+// reset                reset the script
+// return               Asks the nurbs to all return to the home position
+// hunt                 Asks the nurbs to hunt for a closer fit
+// fast                 On rez, nurbs will hunt.
+//
+    listen( integer channel, string name, key id, string message ) {      
+             if(message == "X" ) gAxis = 1 ;
+        else if(message == "Y" ) gAxis = 2 ;
+        else if(message == "Z" ) gAxis = 3 ; 
+        else if(message == "reset" ) llResetScript() ;
+        else if(message == "return" ) llSay( -6666, "return" ) ;
+        else if(message == "hunt" ) llSay( -6666, "hunt" ) ;
+        else if(message == "big" ) llSay( -6666, "big" ) ;
+        else if(message == "sphere" ) gMode = 1 ;
+        else if(message == "go" ) WalkNurbs() ;
+    }
+}

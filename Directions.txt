@@ -1,0 +1,67 @@
+w* SnurbO'Matic Destructions * 
+------------------------------------
+
+Client Check:  Tools --> Select Only My Objects, and Tools --> Select by Surrounding should both be marked.  Also right click on the ground and select "About Land" to ensure that you have building rights and at least 1100 available prim usage.
+
+1)  Rez the SnurbO'Matic a few meters above your head.
+    (Stand close to it, so it can hear you.  Do not operate within listening distance of another SnurbO'Matic.)
+
+2) Place the object (or linked group of objects) you wish to mold inside.      (Center the object, and make it as big as you can, without letting it poke through.)
+
+3) Reset scripts in Snurb  using the client Tools -> Reset Scripts in Selection      ***Always do this every time you run it.
+
+4) /1024 Z
+     (or X, Y, or just skip this.  Changing the targeting axis will  slightly change the way the finished sculpty looks. We have a samples for this, just ask to see )
+
+5) /1024 nurbs
+    (Starts the Snurb running.  When it's done the big sphere will disappear, and it will tell you how may nurbies are online.)
+
+6) /1024 white
+    (Changes the color of the nurbies, so you can see what's happening in the next step. This is optional.)
+
+7)  Click the nurbies to edit.
+    (This repositions the nurbs that didn't map properly, especially at the top and bottom.  You can also edit manually, moving the nurbies as you would any other object.  Be careful to keep them in order,  [each nurbie is numbered.])
+
+8)  Select all  by right-clicking anywhere on your mold, "Edit,", then surround everything by drawing a rectangle w/ your mouse  - do this TWO times
+    (Very important, as it collects up any stray snurbies that may have turned invisible.  This is SL, things like that happen.
+
+9)  /1024 save
+   (Processes the map. It will tell you when it's done, by asking for a name.)
+  
+10) /4096 name_me
+    (all lowercase, letters or numbers only, no spaces in the name.)
+    
+11)  Paste the link  you have been given into your browser to download.
+    (Firefox is preferred, doesnt always work with Internet Exlpoder due to QuickTime handling the file type wrong.)
+
+12)  Resize in Photoshop  or Gimp to 64x64px.
+    (Optional.  Doing this gives you slightly more detail.)
+    
+13)  Upload to SL.
+    (In preview, choose sculpted in the drop-down.  This is when you'll know whether you forgot Step #8, because you will see mysterious spikes.  If no spikes, you are good to go. )
+    
+14)  Make your sculpty.  Create a box, change the object type to "Sculpted," and drag the uploaded .tga file into the sculpt window.  Resize to suit your needs and apply textures.
+
+15)  /1024 die
+    (This kills off the nurbies, and you are ready to start again.  Don't forget to reset!)
+
+I think that about covers it.  Ok, maybe not so quick, but certainly less time-consuming than learning Blender, and a little bit cheaper than Maya.  Note that this thing makes molds, not copies. 
+
+Happy Snurbing!   Grin
+
+~ Elzbiet Meili
+   Visual Artist
+   Skyhighatrist
+   Snurbologist
+
+
+--------------------------------------------------------------------------------
+http://skyhighatry.com/
+http://forum.skyhighatry.com/  (product discussion, tutorials)
+
+Skyhighatry Designs is a group of creative folks of all types.  Have a project that needs a special touch?  Give us a ping and let's see what we can do for you.  We can manage your projects on the grid from fuzzy thoughts to reality... Virtual Reality that is.
+
+Elzbiet & Anjin Meili - Skyhighatry Designs  (c)2007
+Life As Visual.
+
+  
