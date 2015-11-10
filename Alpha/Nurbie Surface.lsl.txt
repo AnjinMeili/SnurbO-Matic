@@ -1,0 +1,112 @@
+//
+// Surface element that joins Nurbs together
+vector gPos ;
+vector gScale ;
+integer gId ;
+vector gColor ;
+integer gChannel ;
+integer gHandle  ;
+integer gGrid = 16 ;
+integer gMode ;
+integer gSurfChan ;
+integer gTriPos ;
+vector gApos ;
+vector gBpos ;
+
+
+//
+// 
+// form_triangle(position + <1,0,0>, position + <-1,0,0>, position + <0,0,1>);
+form_triangle(vector cor1,vector cor2,vector cor3) {
+    if(llVecDist(cor2,cor3)>llVecDist(cor1,cor2)&&llVecDist(cor2,cor3)>llVecDist(cor1,cor3)) {
+        vector tempvec = cor3;
+        cor3=cor1;
+        cor1=tempvec;
+    }
+    if(llVecDist(cor1,cor3)>llVecDist(cor1,cor2)&&llVecDist(cor1,cor3)>llVecDist(cor2,cor3)) {
+        vector tempvec = cor3;
+        cor3=cor2;
+        cor2=tempvec;
+    }
+    float height=llSin(llRot2Angle(llRotBetween(cor3-cor1,cor2-cor1)));
+    height*=llVecDist(cor1,cor3);
+    float shear=llCos(llRot2Angle(llRotBetween(cor3-cor1,cor2-cor1)));
+    shear*=llVecDist(cor1,cor3);
+    shear=shear/llVecDist(cor1,cor2);
+    shear-=0.5;
+    vector percent=(cor1+(cor2-cor1)*(shear+0.5));
+    vector normal = llVecNorm(llVecNorm(cor2-cor1) % llVecNorm(cor3-cor1));
+    rotation rot=llAxes2Rot(normal,llVecNorm(cor2-cor1),llVecNorm(cor3-percent));
+    vector size=<0.01,llVecDist(cor1,cor2),height>;
+    vector pos=(cor1+cor2)/2+<0,0,height/2>*rot;
+
+    if(size.x<0.01)size.x=0.01;
+    if(size.y<0.01)size.y=0.01;
+    if(size.z<0.01)size.z=0.01;
+
+    while(llVecDist(llGetPos(),pos)>5)llSetPos(pos);
+    llSetPrimitiveParams([PRIM_TYPE,PRIM_TYPE_BOX,0,<0,1,0>,0.0,<0,0,0>,<1,0,0>,<0,shear,0>,PRIM_ROTATION,rot,PRIM_POSITION,pos,PRIM_SIZE,size]);
+}
+
+
+myInit() {
+        gPos = llGetPos() ;
+        gScale = llGetScale() ;
+        integer col = llFloor( gId / gGrid ) ;
+        integer row = gId - ( col * gGrid ) ;
+        gSurfChan = 8000 + gId ;
+        gChannel = 6000 + gId ;
+        
+        llListenRemove( gHandle ) ;
+        gHandle = llListen( gSurfChan, "", NULL_KEY,"" ) ;
+        if(gId>0){
+            llSetPrimitiveParams( [PRIM_TEMP_ON_REZ, TRUE] ) ;
+        }
+        integer Achan ;
+        integer Bchan ;        
+        //
+        // Position the top triangle
+        if( gTriPos == 1 ) {
+            Achan = gId - 1 ; 
+            Bchan = gId - gGrid;
+        } 
+        //
+        // Position the bottom triangle
+        if( gTriPos == 2 ) {
+            Achan = gId + 1 ;
+            Bchan = gId + 16 ;
+        }
+        llSay(Achan, (string)gId) ;
+        llSay(Bchan, (string)gId) ;
+    }
+
+
+default
+{
+    state_entry()
+    {
+        myInit() ;
+    }
+
+    on_rez( integer param ) {
+        if( param > 4000 ) {
+            gTriPos = 1 ;
+            gId = param - 4000 ;
+        }
+        else if( param > 2000 && param < 4000 ) {
+            gId = param - 2000 ;
+            gTriPos = 2 ;
+        }
+        myInit() ;
+        
+    }
+    
+   listen(integer channel, string name, key id, string message)
+   {
+        if(gApos == ZERO_VECTOR) gApos = (vector)message ;
+        else gBpos = (vector)message ;
+        if(gApos!=ZERO_VECTOR&&gBpos!=ZERO_VECTOR) {
+            form_triangle( gApos, gBpos, gPos ) ;
+        }
+   }
+}

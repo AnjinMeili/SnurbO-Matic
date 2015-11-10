@@ -1,0 +1,36 @@
+vector gPos ;
+float gRadius = 1 ;
+integer gGrid = 16 ; 
+
+
+default
+{
+    state_entry()
+    {
+        llSay(0, "Hello, Avatar!");
+    }
+
+    touch_start(integer total_number)
+    {
+        integer sx ;
+        integer sy ;
+        float x ;
+        float y ;
+        float z ;
+        float rads = 22.5 * DEG_TO_RAD ;
+        
+        for( sx = 1; sx <= 16; sx++ ) {
+            z = ( gRadius * 2 ) / gGrid ; 
+            for( sy = 1; sy <= 16; sy++ ) {
+                float rads = ( 22.5 * sy ) * DEG_TO_RAD ;
+                x = z * llCos(rads) ;
+                y = z * llSin(rads) ;
+                llRezObject("Nurbie", gPos + <x,y,z>, ZERO_VECTOR, ZERO_ROTATION, sx*sy );
+            }
+        }
+                
+        
+    }
+}
+
+

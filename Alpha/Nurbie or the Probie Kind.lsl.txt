@@ -1,0 +1,59 @@
+//
+// Nurbie
+//
+// Node element of a Nurb Sphere
+//
+
+vector gPos ;
+vector gScale ;
+integer gId ;
+vector gColor ;
+integer gChannel = 1024 ;
+integer gHandle ;
+integer gGrid = 33 ;
+integer gMode ;
+integer gSurfChan ;
+
+
+myInit() {
+        gPos = llGetPos() ;
+        gScale = llGetScale() ;
+        llListenRemove(gHandle) ;
+        llSay(4096,(string)gId + "|" + (string)gPos) ;
+        gHandle = llListen(gChannel, "", NULL_KEY,"") ;
+    }
+    
+default {
+    state_entry() {
+        myInit() ;
+    }
+    
+    on_rez( integer param ) {
+        gId = param ;
+        myInit() ;
+    } 
+    
+    listen( integer channel, string name, key id, string message) {
+        if( message == "die" ) llDie() ;
+        else if ( message == "save" ) llSay(4096,(string)gId + "," + (string)gPos) ;
+        else {
+            vector rootpos = (vector)message ;
+        vector offset = rootpos - gPos  ;
+        float r ;
+        float g ;
+        float b ; 
+        float c ;
+        c = llSqrt( llPow( offset.x, 2) + llPow( offset.y, 2)) ;
+        if( c != 0 ) {
+            r = ( ( ( offset.x + 1 ) / c ) + 1 ) ; 
+            g = ( ( ( offset.y + 1 ) / c ) + 1 ) ;
+            b = ( ( ( offset.z + 1 ) / c ) + 1 ) ;
+        }
+        if( r != 0 ) r = r / 2 ;
+        if( g != 0 ) g = g / 2 ;
+        if( b != 0 ) b = b / 2 ;
+       // llOwnerSay((string)gId + " " + (string)<r,g,b> + " " + (string)rootpos ) ;
+        llSetColor(<r,g,b>, ALL_SIDES) ;
+    }   
+}
+} 

@@ -1,0 +1,103 @@
+//
+// The number after the word SILO is your data versioning.  Always use 99 to start, this is your unique key for data.  It saves it under 
+// that as its root.   The next two is for the version of code running.  00 for alpha, 01 for beta, 02 for release, etc.  How
+// ever works for you best, but alwasy use silo/99  to start!  Version code must be 4 places!
+
+string SILO = "http://thisoldtrawler.com/silo/9900" ; 
+integer gBuff = 250 ;
+integer gHandle ;
+string gPacket ;
+integer gSent ;
+integer gCnt ;
+vector gPos ;
+integer gSlices = 64 ;
+integer gMcnt ;
+integer gControlHandle ;
+vector gScale ;
+float gRadius ;
+integer gCommChan = 1029 ;
+integer gSliceChan = 115511 ;
+integer gMangChan = 80 ;
+integer libDB = 4981 ; 
+integer gTcnt ;
+
+SendPacket() {
+    gSent++ ;
+    string silo = SILO + "blackbox/slicer_" + (string)gSent ;    // This adds more seperation betwee the data using another dir.
+    llHTTPRequest( silo, [HTTP_METHOD,"PUT"], gPacket ) ;
+    gPacket = "" ;
+    gCnt = 0 ;
+    }    
+                                
+default
+{ 
+    state_entry() {
+        gHandle = llListen(-4981, "", NULL_KEY,"") ;
+        gControlHandle = llListen(4981, "", NULL_KEY, "") ;
+        gPos = llGetPos() ;
+    }
+
+    on_rez( integer param ) {
+        llResetScript() ;
+    }
+        
+    listen( integer channel, string name, key id, string message ) {
+        if( channel == -4981 ) {
+            list messlist = llParseString2List( message, ["|"], [] ) ;
+            integer packId = (integer)name ;
+            float radius = ( (float)llList2String( messlist, 0 ) / 2 ) ;
+            vector packPos = (vector)llList2String( messlist, 1 ) ;
+            float deg = ( 360.0 /  ( (float)gSlices - 1 )  ) ;
+            integer i ;
+            vector firstpos ;
+            for( i = 1 ; i <= gSlices ; i++ ) {
+                gTcnt++ ;
+                float r ;
+                float g ;
+                float b ;
+                float irads = ( deg * i ) * DEG_TO_RAD ; 
+                float x ;
+                float y ;
+                vector thispos = packPos - gPos ;
+                x = radius * llSin(irads) ;  
+                y = radius * llCos(irads) ;
+                if( packId > 1 && i < gSlices ) {
+                    thispos = ( packPos + < x, y, 0 > ) - gPos ;
+                }
+                
+                if( i == 1 ) firstpos = thispos ; 
+                else if( i == gSlices ) thispos = firstpos ;
+                
+                r = thispos.x ;
+                g = thispos.y ;
+                b = thispos.z ;
+                
+                r = ( ( r / 5 ) + 1 ) ;
+                g = ( ( g / 5 ) + 1 ) ;
+                b = ( ( b / 5 ) + 1 ) ; 
+                if( r != 0 ) r = r / 2 ;
+                if( g != 0 ) g = g / 2 ;
+                if( b != 0 ) b = b / 2 ;
+                integer R = (integer)( r * 255 ) ;
+                integer G = (integer)( g * 255 ) ;
+                integer B = (integer)( b * 255 ) ;
+                if( packId == 1 || packId == gSlices ) { 
+                    R = 128 ;
+                    G = 128 ;
+                } 
+                gPacket = gPacket + "\n" + (string)R + "," + (string)G + "," + (string)B ;   
+            }
+            SendPacket() ;
+            integer nextchan = packId + gSliceChan + 1 ;
+            llSay( -nextchan, "save" ) ;
+            if( packId == gSlices ) {
+                llSay( 0, "Save Finished!" ) ; 
+                llResetScript() ;
+            }
+        }          
+        if( message == "reset" ) {
+            llResetScript() ;  
+        }
+    }
+                
+}

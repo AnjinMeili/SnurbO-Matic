@@ -1,0 +1,80 @@
+vector gMypos ;
+vector gScale ;
+string gGrid = "sculpt cube raw 32x32"; 
+integer gLine = 0;  
+key gQueryID;
+list gOutput ; 
+string SILO = "http://www.thisoldtrawler.com/silo/0201" ;
+float gMyscale ;
+vector gMoveto ;
+
+pushdata(string output) {
+    string silo = SILO + "/clone/data_" + (string)gLine ;
+    llHTTPRequest(silo,[HTTP_METHOD,"PUT"],output) ;
+} 
+    
+
+default {
+
+   state_entry() {
+        llSay(0,"Place an object fully inside, and mostly center of the cube.") ;
+        llSay(0,"It cannot touch the cube walls, and it must be physical") ;
+        llSay(0,"Touch me when you're ready.");
+        gLine = 0 ;
+        gMypos = llGetPos() ;
+        gScale = llGetScale() ; 
+        gMyscale = ( ( gScale.x + gScale.y + gScale.z ) / 3 ) / 256 ;
+   }
+
+    touch_start(integer detected) {
+        gQueryID = llGetNotecardLine( gGrid, gLine) ;
+    }
+    
+   dataserver(key query_id, string data) {
+       if (query_id == gQueryID) {
+           if (data != EOF) {    // not at the end of the notecard
+                llOwnerSay("Line " + (string)gLine) ;
+                list vectors = llParseString2List(data,[" "],[]) ;
+                integer cnt = llList2Integer(vectors,1) ;
+                float x = ( llList2Float(vectors,2) - 128 ) * gMyscale ;
+                float y = ( llList2Float(vectors,3) - 128 ) * gMyscale ;
+                float z = ( llList2Float(vectors,4) - 128 ) * gMyscale ;
+                gMoveto = gMypos + <x,y,z>  ;
+                llSetPrimitiveParams([PRIM_TYPE, PRIM_TYPE_SPHERE, 0, <0.0, 1.0, 0.0>, 0.0, <0.0, 0.0, 0.0>, <0.0, 1.0, 0.0>,
+                    PRIM_SIZE,<.1,.1,.1>,
+                    PRIM_POSITION, gMoveto,
+                    PRIM_PHYSICS, TRUE] ) ;
+                llMoveToTarget(gMypos,1) ;
+               ++gLine;                // increase line count
+               gQueryID = llGetNotecardLine(gGrid, gLine);    // request next line
+           }
+       }
+   } 
+
+    collision_start(integer num_detected) {
+        vector curpos = llGetPos() ;
+        llStopMoveToTarget() ;
+        llSetStatus(STATUS_PHYSICS, FALSE) ;
+        llSetPos(gMypos) ;
+        vector rgb = < ( gMypos.x - curpos.x ) / gMyscale, ( gMypos.y - curpos.y ) / gMyscale, ( gMypos.z - curpos.z ) / gMyscale > ; 
+        string outstr = (string)gLine + "  " + (string)rgb ;
+        pushdata( outstr ) ;
+        ++gLine ;
+        gQueryID = llGetNotecardLine(gGrid, gLine) ;
+    }
+
+//    at_target(integer tnum, vector targetpos, vector ourpos) {
+//        llStopMoveToTarget() ;
+//        string outstr = (string)gLine + "  " + (string)ZERO_VECTOR ;
+//        llSetStatus(STATUS_PHANTOM, TRUE) ;
+//        pushdata( outstr ) ;
+//        ++gLine;                // increase line count
+//        gQueryID = llGetNotecardLine(gGrid, gLine);   
+        
+        
+//    }
+         
+    on_rez(integer param) {
+        llResetScript() ;
+    }
+}

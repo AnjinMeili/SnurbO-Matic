@@ -1,0 +1,46 @@
+//
+// Nurbie
+//
+// Node element of a Nurb Sphere
+//
+
+vector gPos ;
+float gScale ;
+integer gId ;
+vector gColor ;
+integer gChannel ;
+integer gHandle = 9090 ;
+integer gGrid = 16 ;
+
+myInit() {
+        gPos = llGetPos() ;
+//        gScale = llGetScale() ;
+        integer col = llFloor( gId / gGrid ) ;
+        integer row = gId - ( col * gGrid ) ;
+        integer r = col * gGrid ;
+        integer g = row * gGrid ;
+        integer b = ( r * g ) / ( 256 / gGrid ) ;  
+        gColor = < r, g, b > ;
+        
+        llSetColor( gColor, ALL_SIDES ) ;
+        
+        llListenRemove(gHandle) ;
+        gHandle = llListen(gChannel, "", NULL_KEY,"") ;
+    }
+        
+default {
+    state_entry() {
+        myInit() ;
+    }
+    
+    on_rez( integer param ) {
+        gId = param ;
+        myInit() ;
+    } 
+    
+    listen( integer channel, string name, key id, string message) {
+        if( message == "die" ) {
+            llDie() ;
+        }
+    }
+}       

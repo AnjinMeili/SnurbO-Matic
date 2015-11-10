@@ -1,0 +1,165 @@
+Welcome to SnurbO'Matic!                                                                                     Anjin Meili, Skyhighatry Designs (c) 2007
+================================================================
+
+Thank you for helping us beta test this product.  The solution today works seamlessly, and provides textures quickly.  But, the user interface, mesh node controls, and a number of other hurdles need to be overcome.  For giving us the support and time to test, we will provide you with free backend use for 1 full year.  We will also insure you get continued updates as we improve the process.
+
+Please take the time to join the 'SnurbO'Matic' users group!!
+
+My hope is that all beta testers will give me enough feedback that I can tune and refine these points.
+
+:: Introduction  :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+ The SnurbO'Matic is an on-grid way of creating molds from objects.  These molds can then be used to create a sculpted texture map.  Some of the project goals are to help define  suitable methods for sculpted mesh manipulation in world.  The tools must be easy enough for everyone to produce exciting results, yet rich enough that the more one learns, the finer the detail can be.
+
+The starting form is a large sphere, with all 3 axis clearly displayed.    When looking at this sphere, the blue line thru the middle, the Z axis, is where the poles form.    Around the outside of this sphere is where the mesh is formed.  Objects to be molded are placed fully inside the sphere, making sure the axis cross thru the object.  Placement is key to a good mold.    The object is then scanned and the data fed off grid to a backend that creates the final texture.
+
+
+:: Interface :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+To interact with SnurbO'matic at this stage is rather simple.  After you rez it, make sure you have enough free space to play.  You will want about 1100 prims to drive a 32x32 mesh.  The mesh can be resized, but only by editing a config value.  So if you need a smaller mesh, 16x16 say for 260 prims, just let me know.
+
+You communicate with the SnurbO'matic  using chat commands.  I have other tools that have far more robust command syntax that I will be rolling into the Snurbie soon.  But for now, you get a simple and short set of options.
+
+So, put the Snurbie sphere out so its not near any other objects.  Keeping it at least a few meters away is wise, but you must be close enough to speak to it.  Find an object that you wish to mold.  Its easy to just start with a few prims you stick together.  I think it's a great way to visualize the mesh formation and deformation if you go thru the basic objects, like squares, triangles, blobs made of both.  To fully appreciate the mesh, take a quick look at it in Wireframe mode (Ctrl+Shift+R).  Then, dig around in your inventory and find a nice animal head ... round objects without a lot of 'undercuts' sample the best.
+
+Get your object as big as possible, yet still small enough to full fit inside the Snurbie Sphere.  Again, pay attention to the axis.  The axis juntion should be well inside the object, close to center.  The poles will form at the top and bottom, and targeting is best along the Z axis.  With these rules in mind, position the object so the longest direction is along the Blue line, or the Z axis.  You can size the sphere up and down as well.  Keep in mind that the most accurate you can get with automagic molding is +/- 1cm.  So a big ole 8 foot object gives you far more detail with much less average noise.  BIG is good!
+
+Just before starting, always reset the Snurbie.  Use the Tools->Reset Scripts in Selection  option of your client.  If you do not see a response in your chat windows, you will need to try Tools->Set Scripts to Running option as well.
+
+When the tool is online, it will announce itself.
+
+        [12:20]     SnurbO'Matic 32  - Alpha 1: Ready Freddy!
+
+Now, you have a few options you can work with to get differing results.  First, we will show you what the mesh looks like.   Type the following:
+
+        /1024 sphere
+        /102 4 nurbs
+
+When you issue the nurbs command, you should see:
+
+        [12:38]  SnurbO'Matic 32  - Alpha 1: MakeNurbMap: Cranking up da Nurbies.
+
+And you should also see, starting at the bottom, a very uniform mesh forming from little white spheres.  We call those little spheres nurbies.    As it continues to crank the nurbies up, you can just get a cup of coffee.  To fill that mesh needs about 1025 those nurbies to get all rezzed up.  The Snurbie knows where to locate all the nurbies for the best mesh position to start from.
+
+Once the mesh is finished, the Snurbie will annouce with:
+    
+        [12:41]  SnurbO'Matic 32  - Alpha 1: MakeNurbMap: 1089 Nurbies online!
+
+
+The mesh we work with is actually 33x33.  But the top and bottom Z axies poles, along the blue line, only need one mesh node to represent, as for those rows, they all map to that point.  And the first column maps to the last column, giving us actually a 31x32 mesh with two pole coordiantates.
+
+To get a visualization of the mesh, you can use the command:
+
+        /1024 color
+        
+And the nurb points will all color  according to the RGB value of thier current XYZ postion.  Pretty!
+
+So, now that you get the idea for that.  Lets kill off that mesh, and start with something else.
+
+        /1024 die
+
+All the nurbies should go away, and the Snurbie is now a big ball again.  Click on the Snurbie and give her a reset again.  Tools->Reset Scripts in selection.   We do this a lot cause its beta code :)  NEVER reset the Snurbie when the external sphere is not visible!  If the nurbs are out, DO NOT RESET!!!  Always issue the die command first, then reset.
+
+Now, the first thing we will want to do is examine the object.  Find the longest axis, and try an orient that down so the blue line, Z axis, goes thru the longest part.  You can also set it at a bit of a 45... Or just throw it in there and see what happens!
+
+Currently you can run default mode, no modifiers.  Or you can use the X,Y, or Z axis as a modifiers.  Let's just fire up a molding session now without any.  Then we will get into those again.
+
+        /1024 nurbs
+        
+Again, the nurbs will start to rez up, but this time, if you zoom in really close, you can see them shrinking down to as tiny as possible, and then riding in to the center object on a smooth parabolic curve.  Kinda fun to watch.  As they move in and find their spots, they will change color to thier property RGB values in the final texture
+
+You will always see a few of the nurbies that seem to collect up a bit at the poles, dont worry about those just yet.  Again, we are waiting for the Snurbie to annouce:
+
+        [12:41]  SnurbO'Matic 32  - Alpha 1: MakeNurbMap: 1089 Nurbies online!
+        
+The outside sphere should disappear now, so you can get to the mesh.   Take a good look at where all the mesh nodes fall along your model.  We might as well walk thru all the modifiers now so you can get a grasp.
+
+First, look closely at the patterning on your object by the nurbies.  Perhaps take some snapshots so you can compare later.  Next, let's give it a modifier.  Note the modifier letter is UPPER CASE.
+        
+        /1024 die
+        /1024 Z
+        /1024 nurbs
+        
+This will cause the targeting to spread out evenly along the Z axis, giving much better mesh distribution for an object thats long, and has the blue, Z, line running thru the long way.  You will see that the mesh forms better along that axis.  When you get done starting and enjoying it, try the other two modifiers.  You can really get a sense of the targeting if you put nothing in the Snurbie at all.. Just let it fire into empty space.  The targeting points will show as a plotted scatter graph.
+
+        /1024 die
+        /1024 X
+        /1024 nurbs
+        
+        /1024 die
+        /1024 Y
+        /1024 nurbs
+        
+You should be getting the idea now.   Z has the best affect, and IMHO, is the preferred targeting method.  It requires you to rotate and tilt an object to the longest piece goes thru the Z, blue axis, but it's worth it.  The X and Y modifiers  create a pretty sine wave that rides along the X or Y axis depending on the modifier.  
+
+Ok...   So at this point, you should still have a sphere up from the last command.
+
+The next step is to wander around the model and look for aberrations.  Examples, those poles on the top and bottom.  A bit of nurbie bunching will always happen.  So use your mouse and just touch the nurbies that are jutting far away from the model.  They should shrink small again, fly a bit back to the sphere edge, then retarget.  The targeting is based on averaging neighbors, and a mean of collisions.   You will see them just shink, back up a bit and then zoom right on into the sphere.
+
+While you are here, notice that each nurbie has a number?  1 thru 1057... And that in the description is a set of numbers like 4,5.  Those values mean Row 4, Column 5.  They are position keys for everything else.  Dont get carried away here.  Play a bit, but just click on the ones that are far away from the object.  You should play around with click on anything and everything a bit, and watch how the targeting changes.
+
+If you would like to see this more clearly, you can get rid of the colors. 
+
+        /1024 white
+        
+This makes the RGB color map go away.  Everytime a nurbie is moved, it will change color again.  This lets you quickly see how the targeting is working, even in crowded areas of the mesh.
+
+You can also move the mesh nodes around using your favorite building methods.   Just drag them where you want.  Now, just starting, I am sure you will find the mesh still seems a bit foreign.  But the more you see it, the easier it gets.  For now, lets just concentrate on th ones a long visible way away from the object.  Typically only at the top and bottom Z poles.
+
+Now, for some reason the simulator will put some objects to sleep... They just float out there and never finish thier run.  I have found you can clean this up by selecting one nurbie for EDIT.  Then, using your mouse, draw a bounding box all around the entire mass of nurbies.  You might notice as your system struggles to keep up with this, that there are a few little bright points you cannot see floating around the sphere here or there.  Try and reselect a new edit box around one, or a group of those little spots... You will find that they almost immediately just zoom right on in and hunt the object.  If you don't do this step, you can end up with funny spikes and aberrations.    Dont move your view point or avatar when everything is selected, and it should work just fine.
+
+So, now we have touched on all the big nurbies hanging about. Perhaps we moved a few nurbies around to put up edge details.  And we have let the sim refind the lost little nurbies by selecting them with a bounding box.  Thats all you have to do for the last step, just select and watch :)  Once you are sure the nurbies are all against your object, we can save.
+
+At this point, I usually like to do another white, so I can watch the save process.
+
+        /1024 white
+        /1024 save
+        
+Yes, the command parser is very terse, and dosnt report a lot to you.  Just be patient and watch.  If the nurbies are all white, starting at the bottom, you will see them start changing color as the save enginer polls each nurbie for position.
+
+As this is going on, you can still play with any of the white nurbies, but make sure you don't get caught moving one when it changes color!
+
+As it reaches each buffer position, the Snurbie will tell you its progress.  Once complete, it will report that the save is finished.  Here it will ask for a FILENAME to save the finished mesh too.  Notice that this time the channel has changed.
+
+        [13:18]  SnurbO'Matic 32  - Alpha 1: libDB: Finished Save for 1090 nurbs in 5
+        [13:18]  SnurbO'Matic 32  - Alpha 1: libDB: Please say a name for this casting on channel 4096.  letters & numbers ONLY!
+        
+So, we give it a filename.  If you use the same file name over and over, it will overwrite any saved data.  If you use a differing file name everytime, you will burn up all of my disk space :)  So while you are playing try to reuse the same filenames over and over.
+
+        /4096 testsculpt
+
+And after a moment, it should repond as follows:
+
+        [13:20]  SnurbO'Matic 32  - Alpha 1: Got filename testsculpt, and mold is saved.  Making casting!
+        [13:20]  SnurbO'Matic 32  - Alpha 1: Mold Caster says : 
+                        http://thisoldtrawler.com/sl/molds/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/testsculpt.tga
+
+Now, open your web browser and fetch that url.  You can use an offworld viewer to make sure it's worth uploading... Or when you uploadfile, in the preview box, there is a pull down on the top right that lets you select 'Sculpted Preview.'  Use it and you can get a good idea what you have made.  If you happen to see spikes where they shouuldn't be, chances are you forgot to select all of them to collect any strays  before you typed the save command.
+
+The mesh you pick up is only 33x33 as well.  You may wish to resize this to 64x64 using any TGA aware editing pacakge.  There is no need, but at 33x33 you will see lots more rounding in the mesh, and less detail.  So perhaps while you're trying to get the first texture to upload past the asset servers, you can pull open the texture in a image editor.  You see the colors of each pixel, and just bump it up with a nomix filter to 64x64.  You can also try all the resizing and resampling filters your application provides.  Some of the various gradiant methods turn out outstanding.
+
+Once uploaded to the grid, apply the texture as you would any sculpted texture.  If you size it up to the same scale as the Snurbie was when you started, it should be nearly identical in size a the original object.  Since we haven't killed them off, the nurbie mesh should still be up.  If you highlight the object you molded... And then drag it out of the mesh... You will have a unique perspective on it.  If you work out in a well lit and open space -- I like to hang out over a cliff -- then you can fly right inside and take a close gander.  
+
+The more time you spend cleaning up the mold before you save it... The higher quality model you can expect to form.
+
+And again, when you are ready to play some more, try again...  Start out with 
+
+            /1024 die
+
+Remeber, only when the outer containing sphere is rezzed can you reset it!    But do reset it on occasion.  I always reset it just before starting a new run... To insure sanity.
+
+I hope this tutorial gets you going with this exciteing new tool.  I have so many projects that I am working on that it has been hard to focus on this one.  But with your help, we can identify the weak spots of the UI.
+
+I know that I need to give some more identifing tags to mesh points, so when they are clumped together, you can visually find a mesh point's neighbors, as well as the mesh point's neighbor's neighbors.  As all mesh movements must be neighbor aware.
+
+Cheers
+
+Anjin Meilie
+
+
+
+
+
+
+
+        
